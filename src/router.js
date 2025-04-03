@@ -3,6 +3,7 @@ import Router from "vue-router";
 import HomePage from "./components/HomePage.vue";
 import UploadPage from "./components/UploadPage.vue";
 import JupyterExecutor from "./components/JupyterExecutor.vue";
+import JupyterLabEditor from "./components/JupyterLabEditor.vue";
 
 Vue.use(Router);
 
@@ -23,6 +24,11 @@ export default new Router({
       path: "/editor",
       name: "JupyterExecutor",
       component: JupyterExecutor,
+    },
+    {
+      path: "/JupyterLabEditor",
+      name: "JupyterLabEditor",
+      component: JupyterLabEditor,
     },
   ],
 });
