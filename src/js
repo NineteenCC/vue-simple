@@ -1,0 +1,117 @@
+; interface CodeDiff {
+;   originalCode: string;  // 原始代码
+;   currentCode: string;   // 经过用户操作后的当前代码
+;   changes: ChangeItem[]; // 具体的修改列表（每项可单独接受/撤销）
+;   history: ChangeHistory[]; // 变更历史（支持撤回）
+; }
+
+; interface ChangeItem {
+;   id: string;           // 每个修改的唯一标识（UUID 或行号+类型）
+;   type: "addition" | "deletion" | "modification"; // 变更类型
+;   originalText?: string; // 被删除或修改的文本
+;   modifiedText?: string; // 新增或修改后的文本
+;   lineNumber: number;    // 代码所在行号
+;   applied: boolean;      // 此修改是否已应用
+; }
+
+; interface ChangeHistory {
+;   changeId: string;     // 关联的 ChangeItem ID
+;   action: "apply" | "revert"; // 变更类型（应用 or 撤销）
+;   timestamp: number;    // 操作时间戳
+; }
+
+
+
+
+
+
+
+
+
+; function applyChange(codeDiff: CodeDiff, changeId: string) {
+;   const change = codeDiff.changes.find(c => c.id === changeId);
+;   if (!change || change.applied) return;
+
+;   let lines = codeDiff.currentCode.split("\n");
+
+;   if (change.type === "deletion") {
+;     lines[change.lineNumber - 1] = ""; // 删除对应行
+;   } else if (change.type === "addition") {
+;     lines.splice(change.lineNumber - 1, 0, change.modifiedText!); // 插入新内容
+;   } else if (change.type === "modification") {
+;     lines[change.lineNumber - 1] = change.modifiedText!; // 直接替换
+;   }
+
+;   codeDiff.currentCode = lines.filter(line => line.trim() !== "").join("\n");
+;   change.applied = true;
+
+;   // 记录变更历史
+;   codeDiff.history.push({ changeId, action: "apply", timestamp: Date.now() });
+; }
+
+
+
+
+; function revertChange(codeDiff: CodeDiff, changeId: string) {
+;   const change = codeDiff.changes.find(c => c.id === changeId);
+;   if (!change || !change.applied) return;
+
+;   let lines = codeDiff.currentCode.split("\n");
+
+;   if (change.type === "deletion") {
+;     lines.splice(change.lineNumber - 1, 0, change.originalText!); // 重新插入删除的文本
+;   } else if (change.type === "addition") {
+;     lines = lines.filter(line => line !== change.modifiedText); // 删除新增的文本
+;   } else if (change.type === "modification") {
+;     lines[change.lineNumber - 1] = change.originalText!; // 恢复原始内容
+;   }
+
+;   codeDiff.currentCode = lines.filter(line => line.trim() !== "").join("\n");
+;   change.applied = false;
+
+;   // 记录撤回操作
+;   codeDiff.history.push({ changeId, action: "revert", timestamp: Date.now() });
+; }
+
+
+
+
+
+; {
+;   "originalCode": "print(\"Found files:\")\nfor match in matching_files:\n    print(match)",
+;   "currentCode": "print(\"Found files:\")\nfor match in matching_files:\n    print(match)",
+;   "changes": [
+;     {
+;       "id": "1",
+;       "type": "deletion",
+;       "originalText": "print(\"Found files:\")",
+;       "lineNumber": 1,
+;       "applied": false
+;     },
+;     {
+;       "id": "2",
+;       "type": "deletion",
+;       "originalText": "for match in matching_files:\n    print(match)",
+;       "lineNumber": 2,
+;       "applied": false
+;     },
+;     {
+;       "id": "3",
+;       "type": "addition",
+;       "modifiedText": "# Display the results",
+;       "lineNumber": 1,
+;       "applied": false
+;     },
+;     {
+;       "id": "4",
+;       "type": "addition",
+;       "modifiedText": "matching_files",
+;       "lineNumber": 2,
+;       "applied": false
+;     }
+;   ],
+;   "history": []
+; }
+
+
+
