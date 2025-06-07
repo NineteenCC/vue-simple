@@ -6,69 +6,65 @@
         <h2>欢迎回来，{{ userInfo?.name || '用户' }}！</h2>
       </div>
 
-      <div v-if="userInfo?.name === '张三'">
-        <!-- 新增请假按钮 -->
-        <button @click="toggleForm" class="add-leave-btn">
-          {{ showForm ? '关闭请假表单' : '新增请假申请' }}
-        </button>
-
-        <!-- 请假表单 -->
-        <transition name="fade">
-          <form v-if="showForm" @submit.prevent="submitLeaveRequest" class="leave-form">
-            <div class="form-group">
-              <label>请假理由：</label>
-              <input v-model="leaveForm.reason" required placeholder="请输入请假理由" />
-            </div>
-            <div class="form-group">
-              <label>开始日期：</label>
-              <input type="date" v-model="leaveForm.startDate" required />
-            </div>
-            <div class="form-group">
-              <label>结束日期：</label>
-              <input type="date" v-model="leaveForm.endDate" required />
-            </div>
-            <!-- 其他表单项 -->
-            <div class="form-group">
-              <label>审批流程：</label>
-              <select v-model="leaveForm.processId" required>
-                <option disabled value="">请选择审批流程</option>
-                <option v-for="process in approvalProcesses" :key="process.id" :value="process.id">
-                  {{ process.name }}  ({{ process.code }})
-                </option>
-              </select>
-            </div>
-
-            <button type="submit" class="submit-btn">提交申请</button>
-          </form>
-        </transition>
+      <div>
+        <el-button type="primary" @click="showForm = true">
+          申请请假
+        </el-button>
+        <LeaveFormDialog
+            :visible.sync="showForm"
+            @submitted="refresh"
+        />
       </div>
 
-      <div v-else>
-        <h3>待审批的请假申请</h3>
-        <ul>
-          <li v-for="(request, index) in leaveRequests" :key="index">
-            {{ request.reason }} ({{ request.startDate }} 至 {{ request.endDate }}) - 发起人: {{ request.requester }}
-            <button @click="approveRequest(index)">
-              <i class="fas fa-check"></i> 审批通过
-            </button>
-          </li>
-        </ul>
+      <div>
+        <el-card>
+          <h3>请假记录列表</h3>
+          <el-table :data="leaveList" border stripe style="width: 100%">
+            <el-table-column prop="id" label="ID" width="60" />
+            <el-table-column prop="applicant" label="请假人" />
+            <el-table-column prop="reason" label="请假理由" />
+            <el-table-column prop="startTime" label="开始时间" />
+            <el-table-column prop="endTime" label="结束时间" />
+            <el-table-column prop="days" label="请假天数" width="90" />
+            <el-table-column prop="flowState" label="流程状态" />
+            <el-table-column prop="createTime" label="创建时间" />
+            <el-table-column prop="processInstanceId" label="流程实例ID"
+            width="200%"/>
+          </el-table>
+        </el-card>
       </div>
 
-      <h3>审批记录</h3>
-      <ul>
-        <li v-for="(record, index) in approvalRecords" :key="index">
-          {{ record }}
-        </li>
-      </ul>
+<!--      <el-card>-->
+<!--        <h3>待审批的请假申请</h3>-->
+<!--        <el-table :data="leaveRequests" border stripe style="width: 100%">-->
+<!--          <el-table-column prop="id" label="ID" width="60" />-->
+<!--          <el-table-column prop="applicant" label="请假人" />-->
+<!--        </el-table>-->
+<!--      </el-card>-->
+
+<!--      <div>-->
+<!--        <el-card>-->
+<!--          <h3>审批记录</h3>-->
+<!--          <el-table :data="approvalRecords" border stripe style="width: 100%">-->
+<!--            <el-table-column prop="id" label="ID" width="60" />-->
+<!--            <el-table-column prop="applicant" label="请假人" />-->
+<!--          </el-table>-->
+<!--        </el-card>-->
+<!--      </div>-->
+
     </div>
   </div>
 </template>
 
 <script>
+
+import LeaveFormDialog from "@/components/LeaveFormDialog.vue";
+
 export default {
+  components: {LeaveFormDialog},
   data() {
     return {
+      leaveList: [], // 新增：存储从服务端获取的请假列表
       userInfo: null,
       showForm: false,
       leaveForm: {
@@ -77,41 +73,26 @@ export default {
         endDate: '',
         processId: ''
       },
-      approvalProcesses: [
-        { id: 1, name: '普通请假流程', code: 'PROC_796222791258054016' },
-        { id: 2, name: '流程B', code: 'PB002' },
-        { id: 3, name: '流程C', code: 'PC003' }
-      ],
+
       leaveRequests: [],
       approvalRecords: []
     };
   },
   mounted() {
     this.userInfo = this.$store.state.currentUser;
+    this.fetchLeaveList(); // 新增：调用接口获取请假列表
   },
+
   methods: {
-    toggleForm() {
-      this.showForm = !this.showForm;
+    async fetchLeaveList() {
+      const response = await this.$http.get('/leave/list'); // 调用服务端接口
+      this.leaveList = response;
     },
-    submitLeaveRequest() {
-      // 简单校验：结束日期不能早于开始日期
-      if (this.leaveForm.endDate < this.leaveForm.startDate) {
-        alert('结束日期不能早于开始日期');
-        return;
-      }
-      // 添加新请假申请
-      this.leaveRequests.push({
-        reason: this.leaveForm.reason,
-        startDate: this.leaveForm.startDate,
-        endDate: this.leaveForm.endDate,
-        requester: this.userInfo.name
-      });
-      // 重置表单
-      this.leaveForm.reason = '';
-      this.leaveForm.startDate = '';
-      this.leaveForm.endDate = '';
-      this.showForm = false;
+
+    refresh(){
+      this.fetchLeaveList();
     },
+
     approveRequest(index) {
       const approvedRequest = this.leaveRequests.splice(index, 1)[0];
       this.approvalRecords.push(
@@ -124,16 +105,8 @@ export default {
 
 <style scoped>
 
-select {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  /* 不能单独控制option里的文字颜色和对齐 */
+el-card {
+  margin: 20px;
 }
 
 .home {
@@ -145,7 +118,7 @@ select {
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  max-width: 600px;
+  max-width: 80%;
   margin: 0 auto;
 }
 .header {
@@ -195,6 +168,7 @@ button:hover {
   font-weight: 600;
   margin-bottom: 5px;
 }
+.form-group select,
 .form-group input {
   width: 100%;
   padding: 8px 10px;
@@ -202,6 +176,8 @@ button:hover {
   box-sizing: border-box;
   border: 1px solid #ccc;
 }
+
+
 .submit-btn {
   width: 100%;
 }
