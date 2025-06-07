@@ -1,34 +1,14 @@
 import Vue from "vue";
 import Router from "vue-router";
+import LoginPage from "./components/LoginPage.vue";
 import HomePage from "./components/HomePage.vue";
-import UploadPage from "./components/UploadPage.vue";
-import JupyterExecutor from "./components/JupyterExecutor.vue";
-import JupyterLabEditor from "./components/JupyterLabEditor.vue";
 
 Vue.use(Router);
 
 export default new Router({
   mode: "history", // 使用 HTML5 历史模式
   routes: [
-    {
-      path: "/",
-      name: "Home",
-      component: HomePage,
-    },
-    {
-      path: "/upload",
-      name: "Upload",
-      component: UploadPage,
-    },
-    {
-      path: "/editor",
-      name: "JupyterExecutor",
-      component: JupyterExecutor,
-    },
-    {
-      path: "/JupyterLabEditor",
-      name: "JupyterLabEditor",
-      component: JupyterLabEditor,
-    },
+    { path: "/", component: LoginPage },
+    { path: "/home", component: HomePage, props: true }
   ],
 });
