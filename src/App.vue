@@ -12,7 +12,6 @@ export default {
   },
   methods: {
     handleLogin(username) {
-      this.$root.currentUser = username;
       this.$router.push({ path: "/home", query: { user: username } });
     }
   }

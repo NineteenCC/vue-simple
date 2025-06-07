@@ -58,8 +58,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #6e8efb, #a777e3); /* 新增渐变背景 */
-  padding: 0px 0;
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  padding: 0; /* 修改：移除上下内边距，确保背景色撑满全屏 */
 }
 
 .login-box {
@@ -70,6 +70,10 @@ export default {
   width: 100%;
   max-width: 400px;
   text-align: left;
+}
+
+.form-group {
+  margin-bottom: 15px; /* 新增：增加输入框之间的间距 */
 }
 
 .form-input {

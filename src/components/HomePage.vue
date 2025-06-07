@@ -36,15 +36,17 @@
 <script>
 
 export default {
-  props: {
-    user: String
-  },
   data() {
     return {
       leaveReason: "",
       leaveRequests: [],
       approvalRecords: []
     };
+  },
+  computed: {
+    user() {
+      return this.$route.query.user;
+    }
   },
   methods: {
     submitLeaveRequest() {
