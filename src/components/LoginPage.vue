@@ -6,23 +6,23 @@
         <div class="form-group">
           <label for="username">用户名</label>
           <input
-            type="text"
-            id="username"
-            v-model="username"
-            placeholder="请输入用户名"
-            required
-            class="form-input"
+              type="text"
+              id="username"
+              v-model="username"
+              placeholder="请输入用户名"
+              required
+              class="form-input"
           />
         </div>
         <div class="form-group">
           <label for="password">密码</label>
           <input
-            type="password"
-            id="password"
-            v-model="password"
-            placeholder="请输入密码"
-            required
-            class="form-input"
+              type="password"
+              id="password"
+              v-model="password"
+              placeholder="请输入密码"
+              required
+              class="form-input"
           />
         </div>
         <button type="submit" class="login-button">登录</button>
@@ -58,8 +58,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f4f6f8;
-  padding: 20px 0; /* 修改上下间距 */
+  background: linear-gradient(135deg, #6e8efb, #a777e3); /* 新增渐变背景 */
+  padding: 0px 0;
 }
 
 .login-box {
@@ -69,40 +69,23 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  text-align: center;
-}
-
-.login-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #333333;
-}
-
-.form-group {
-  margin-bottom: 20px;
-  text-align: left; /* 确保输入框和标签左对齐 */
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #555555;
+  text-align: left;
 }
 
 .form-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #cccccc;
-  border-radius: 5px;
-  font-size: 16px;
   box-sizing: border-box;
-  transition: border-color 0.3s ease;
+  width: 100%;
+  padding: 12px; /* 增加内边距 */
+  font-size: 16px; /* 增大字体 */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* 添加过渡动画 */
 }
 
 .form-input:focus {
   border-color: #007bff;
   outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* 更柔和的聚焦阴影 */
 }
 
 .login-button {
@@ -114,10 +97,14 @@ export default {
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease; /* 新增缩放动画 */
 }
 
 .login-button:hover {
   background-color: #0056b3;
+  transform: scale(1.05); /* 悬停时放大按钮 */
+}
+.login-title{
+  text-align: center;
 }
 </style>
