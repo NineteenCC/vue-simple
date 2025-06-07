@@ -1,62 +1,83 @@
 <template>
   <div class="home">
     <div class="card">
-      <!-- 新增欢迎语和头像区域 -->
+      <!-- 欢迎语和头像 -->
       <div class="header">
         <img src="https://i.pravatar.cc/100" alt="avatar" class="avatar" />
-        <h2>欢迎回来，{{ user }}！</h2>
+        <h2>欢迎回来，{{ userInfo.name }}！</h2>
       </div>
-      <div v-if="user === '张三'">
+
+      <!-- 如果是张三，显示发起请假 -->
+      <div v-if="userInfo.name === '张三'">
         <h3>发起请假</h3>
         <input v-model="leaveReason" placeholder="请假理由" />
-        <button @click="submitLeaveRequest">提交</button>
+        <button @click="submitLeaveRequest" :disabled="!leaveReason.trim()">提交</button>
       </div>
+
+      <!-- 其他用户显示待审批申请 -->
       <div v-else>
         <h3>待审批的请假申请</h3>
         <ul>
           <li v-for="(request, index) in leaveRequests" :key="index">
             {{ request.reason }} - 发起人: {{ request.requester }}
-            <!-- 美化按钮并添加图标 -->
             <button @click="approveRequest(index)">
               <i class="fas fa-check"></i> 审批通过
             </button>
           </li>
+          <li v-if="leaveRequests.length === 0">暂无待审批的请假申请</li>
         </ul>
       </div>
+
+      <!-- 审批记录 -->
       <h3>审批记录</h3>
       <ul>
         <li v-for="(record, index) in approvalRecords" :key="index">
           {{ record }}
         </li>
+        <li v-if="approvalRecords.length === 0">暂无审批记录</li>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
-
 export default {
   data() {
     return {
+      userInfo: {name:"..."},
       leaveReason: "",
       leaveRequests: [],
       approvalRecords: []
     };
   },
-  computed: {
-    user() {
-      return this.$route.query.user;
+  mounted() {
+    // 假设当前用户信息存储在vuex里
+    this.userInfo = this.$store.state.currentUser;
+
+    // 模拟初始化待审批申请（除张三外才能审批）
+    if (this.userInfo.name !== '张三') {
+      this.leaveRequests = [
+        { reason: "家中有事", requester: "张三" },
+        { reason: "身体不适", requester: "李四" }
+      ];
     }
   },
   methods: {
     submitLeaveRequest() {
-      this.leaveRequests.push({ reason: this.leaveReason, requester: this.user });
+      if (!this.leaveReason.trim()) return;
+
+      // 张三发起请假，加入待审批列表（这里为了简化，直接push，实际项目可请求后端）
+      this.leaveRequests.push({
+        reason: this.leaveReason.trim(),
+        requester: this.userInfo.name
+      });
       this.leaveReason = "";
+      alert("请假申请已提交，等待审批");
     },
     approveRequest(index) {
       const approvedRequest = this.leaveRequests.splice(index, 1)[0];
       this.approvalRecords.push(
-          `${approvedRequest.requester} 的请假已由 ${this.user} 审批通过`
+          `${approvedRequest.requester} 的请假已由 ${this.userInfo.name} 审批通过`
       );
     }
   }
@@ -70,7 +91,7 @@ export default {
 }
 
 .card {
-  background: linear-gradient(135deg, #ffffff, #f5f7fa); /* 渐变背景 */
+  background: linear-gradient(135deg, #ffffff, #f5f7fa);
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -116,7 +137,12 @@ button {
   transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-button:hover {
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
   background-color: #0056b3;
   transform: scale(1.05);
 }
@@ -141,7 +167,6 @@ li:hover {
   transform: scale(1.02);
 }
 
-/* 移动端适配 */
 @media (max-width: 600px) {
   .card {
     padding: 15px;

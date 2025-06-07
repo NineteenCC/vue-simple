@@ -11,8 +11,9 @@ export default {
   components: {
   },
   methods: {
-    handleLogin(username) {
-      this.$router.push({ path: "/home", query: { user: username } });
+    handleLogin(user) {
+      this.$store.dispatch('login', user);  // 保存到 Vuex + localStorage
+      this.$router.push({ path: "/home" });
     }
   }
 }

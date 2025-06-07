@@ -37,18 +37,34 @@ export default {
     return {
       username: "张三",
       password: "1234",
+      users:[
+        {id:1,name:"张三"},
+        {id:2,name:"李四"},
+        {id:3,name:"王五"},
+        {id:4,name:"赵六"},
+        {id:5,name:"老八"},
+      ]
     };
   },
   methods: {
     handleLogin() {
-      const users = ["张三", "李四", "王五"];
-      if (users.includes(this.username)) {
-        this.$emit("login", this.username);
+      const matchedUser = this.users.find(e => e.name === this.username);
+
+      if (matchedUser) {
+        const loginInfo = {
+          ...matchedUser,
+          loginTime: new Date().toISOString()
+        };
+        this.$emit("login", loginInfo);
       } else {
         alert("用户名或密码错误！");
       }
+
     },
   },
+  mounted() {
+    this.$store.dispatch('logout');
+  }
 };
 </script>
 
