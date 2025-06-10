@@ -73,6 +73,7 @@ export default {
       },
       approvalProcesses: [
         { id: 1, name: '普通请假流程', code: 'PROC_796222791258054016' },
+        { id: 1, name: '演示-请假流程', code: 'PROC_800211638593625728' },
         { id: 2, name: '流程B', code: 'PB002' },
         { id: 3, name: '流程C', code: 'PC003' }
       ],

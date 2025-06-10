@@ -37,13 +37,29 @@
                     size="mini"
                     @click="handleApproveRecord(scope.row)"
                 >
-                  查看审批日志
+                  审批日志
                 </el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-card>
       </div>
+
+      <el-dialog
+          title="审批日志"
+          :visible.sync="approvalDialogVisible"
+          width="400px"
+          center
+      >
+        <el-steps direction="vertical" :active="approvalLogs.length" finish-status="success" :space="80">
+          <el-step
+              v-for="(log, index) in approvalLogs"
+              :key="index"
+              :title="`${log.nodeName}(${log.nodeCode})`"
+              :description="`审批人: ${log.approver}\n审批时间: ${log.approvalTime}`"
+          />
+        </el-steps>
+      </el-dialog>
 
     </div>
   </div>
@@ -68,7 +84,9 @@ export default {
       },
 
       leaveRequests: [],
-      approvalRecords: []
+      approvalRecords: [],
+      approvalDialogVisible: false,
+      approvalLogs: []
     };
   },
   mounted() {
@@ -85,8 +103,12 @@ export default {
       this.fetchLeaveList();
     },
 
-    handleApproveRecord(row) {
+    async handleApproveRecord(row) {
       console.log('查看审批记录:', row);
+      this.approvalDialogVisible = true;
+
+      // 模拟加载审批日志数据
+      this.approvalLogs = await this.$http.get('/approvalRecord/getByProcessInstanceId?processInstanceId=' + row.processInstanceId); // 调用服务端接口
 
     },
 
@@ -149,17 +171,7 @@ button:hover {
   background-color: #0056b3;
   transform: scale(1.05);
 }
-.add-leave-btn {
-  margin-bottom: 20px;
-}
-.leave-form {
-  max-width: 400px;
-  margin: 0 auto 30px;
-  text-align: left;
-}
-.form-group {
-  margin-bottom: 15px;
-}
+
 .form-group label {
   display: block;
   font-weight: 600;
@@ -174,10 +186,6 @@ button:hover {
   border: 1px solid #ccc;
 }
 
-
-.submit-btn {
-  width: 100%;
-}
 ul {
   list-style-type: none;
   padding: 0;
@@ -192,13 +200,6 @@ li:hover {
   transform: scale(1.02);
 }
 
-/* 淡入淡出动画 */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
 
 /* 移动端适配 */
 @media (max-width: 600px) {
