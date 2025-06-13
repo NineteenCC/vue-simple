@@ -28,6 +28,11 @@
         />
       </el-form-item>
 
+      <el-form-item label="请假天数" required>
+        <el-input v-model="days" type="int" disabled />
+      </el-form-item>
+
+
       <el-form-item label="审批流程" required>
         <el-select v-model="formData.useFlowKey"
                    placeholder="请选择审批流程"
@@ -65,11 +70,11 @@ export default {
   data() {
     return {
       formData: {
-        reason: '',
-        startTime: '',
-        endTime: '',
+        reason: '我明天要生个小病, 需要请假365天',
+        startTime: Date.now(),
+        endTime: Date.now(),
         days: '',
-        useFlowKey: ''
+        useFlowKey: 'PROC_800211638593625728'
       },
       approvalProcesses: [
         { id: 1, name: '普通请假流程', code: 'PROC_796222791258054016' },
@@ -78,6 +83,19 @@ export default {
         { id: 3, name: '流程C', code: 'PC003' }
       ],
     };
+  },
+  computed: {
+    // 计算属性
+    days() {
+      if(this.formData.startTime && this.formData.endTime){
+        //计算两个日期相差的天数
+        const start = dayjs(this.formData.startTime).startOf('day');
+        const end = dayjs(this.formData.endTime).startOf('day');
+        return end.diff(start, 'day') + 1;
+      }else{
+        return 0;
+      }
+    },
   },
   methods: {
     handleClose() {
@@ -91,17 +109,11 @@ export default {
         return;
       }
 
-      //计算两个日期相差的天数
-      const start = dayjs(this.formData.startTime);
-      const end = dayjs(this.formData.endTime);
-      const days = end.diff(start, 'day') + 1; // 返回整数天数
-
-
       const payload = {
         ...this.formData,
         startTime: dayjs(this.formData.startTime).format('YYYY-MM-DD'),
         endTime: dayjs(this.formData.endTime).format('YYYY-MM-DD'),
-        days
+        ...this.days
       };
 
       await this.$http.post('/leave/add', payload);

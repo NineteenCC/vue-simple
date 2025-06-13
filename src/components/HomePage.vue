@@ -6,7 +6,7 @@
         <h2>欢迎回来，{{ userInfo?.name || '用户' }}！</h2>
       </div>
 
-      <div>
+      <div style="margin-bottom: 10px">
         <el-button type="primary" @click="showForm = true">
           申请请假
         </el-button>
@@ -45,6 +45,37 @@
         </el-card>
       </div>
 
+
+      <div>
+        <el-card>
+          <h3>待办列表</h3>
+          <el-table :data="todoList" border stripe style="width: 100%">
+            <el-table-column prop="id" label="ID" width="50" />
+            <el-table-column prop="applicant" label="请假人" width="80"/>
+            <el-table-column prop="reason" label="请假理由"/>
+            <el-table-column prop="startTime" label="开始时间" width="100"/>
+            <el-table-column prop="endTime" label="结束时间" width="100"/>
+            <el-table-column prop="days" label="请假天数" width="90" />
+            <el-table-column prop="flowState" label="流程状态" width="80"/>
+            <el-table-column prop="createTime" label="创建时间" width="180"/>
+            <el-table-column prop="processInstanceId" label="流程实例ID" width="200"/>
+            <!-- 操作列 -->
+            <el-table-column label="操作" width="150">
+              <template v-slot="scope">
+                <el-button
+                    type="primary"
+                    size="mini"
+                    @click="handleApproveRecord(scope.row)"
+                >
+                  审批
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </div>
+
+
       <el-dialog
           title="审批日志"
           :visible.sync="approvalDialogVisible"
@@ -74,6 +105,7 @@ export default {
   data() {
     return {
       leaveList: [], // 新增：存储从服务端获取的请假列表
+      todoList: [], // 新增：存储从服务端获取的请假列表
       userInfo: null,
       showForm: false,
       leaveForm: {
@@ -92,32 +124,31 @@ export default {
   mounted() {
     this.userInfo = this.$store.state.currentUser;
     this.fetchLeaveList(); // 新增：调用接口获取请假列表
+    this.fetchTodoList(); // 新增：调用接口获取请假列表
   },
 
   methods: {
+
     async fetchLeaveList() {
+      this.leaveList = await this.$http.get('/leave/list'); // 调用服务端接口
+    },
+
+    async fetchTodoList() {
       this.leaveList = await this.$http.get('/leave/list'); // 调用服务端接口
     },
 
     refresh(){
       this.fetchLeaveList();
+      this.fetchTodoList();
     },
 
     async handleApproveRecord(row) {
-      console.log('查看审批记录:', row);
       this.approvalDialogVisible = true;
-
       // 模拟加载审批日志数据
       this.approvalLogs = await this.$http.get('/approvalRecord/getByProcessInstanceId?processInstanceId=' + row.processInstanceId); // 调用服务端接口
 
     },
 
-    approveRequest(index) {
-      const approvedRequest = this.leaveRequests.splice(index, 1)[0];
-      this.approvalRecords.push(
-          `${approvedRequest.requester} 的请假已由 ${this.userInfo.name} 审批通过`
-      );
-    }
   }
 };
 </script>
