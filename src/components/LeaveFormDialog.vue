@@ -110,11 +110,11 @@ export default {
       }
 
       const payload = {
-        ...this.formData,
-        startTime: dayjs(this.formData.startTime).format('YYYY-MM-DD'),
-        endTime: dayjs(this.formData.endTime).format('YYYY-MM-DD'),
-        ...this.days
+        ...this.formData
       };
+      payload.startTime = dayjs(this.formData.startTime).format('YYYY-MM-DD');
+      payload.endTime = dayjs(this.formData.endTime).format('YYYY-MM-DD');
+      payload.days = this.days;
 
       await this.$http.post('/leave/add', payload);
 
